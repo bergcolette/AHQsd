@@ -1,0 +1,1 @@
+populations -P ~/YNP/AHQsd_2021/stacks/ -r .4 --min_maf .05 --max_obs_het .8 --vcf
