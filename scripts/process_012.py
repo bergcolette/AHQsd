@@ -3,41 +3,61 @@ import numpy as np
 from pandas.api.types import is_string_dtype
 from pandas.api.types import is_numeric_dtype
 
-data_genotypes_T = pd.read_csv("AHQsd_T_is_ref.012", sep="\t", index_col=False, header=None).iloc[:, 1:]
-data_indv = pd.read_csv("AHQsd_T_is_ref.012.indv", sep="\t", index_col=False, header=None)
-data_sites_T = pd.read_csv("AHQsd_T_is_ref.012.pos", sep="\t", index_col=False, header=None)
+dataDir="/home/colette_berg/YNP/AHQsd_2021_stacks/"
+genotypes="AHQsd_forPhasing_thinned.012"
 
-tmpDF_T = pd.DataFrame(columns=['scaffold','chr'])
-tmpDF_T[['scaffold','chr']] = data_sites_T[0].str.split('_', expand=True)
+# read in the data -- genotypes, sites, and individuals. 
 
-data_sites_T['chr'] = tmpDF_T['chr']
-data_sites_T['site'] = data_sites_T[0].astype(str) + ['_'] + data_sites_T[1].astype(str)
+## there's one dataframe with T & N and another with the rest of the individuals.
+NT_data = pd.read_csv(dataDir + "NT_forPhasing.012", sep="\t", index_col=False, header=None).iloc[:, 1:]
+NT_indv = pd.read_csv(dataDir + "NT_forPhasing.012.indv", sep="\t", index_col=False, header=None)
 
-data_genotypes_T.columns = data_sites_T['site']
-data_genotypes_T.insert(0, 'indv', data_indv[0])
+data_genotypes = pd.read_csv(dataDir + genotypes, sep="\t", index_col=False, header=None).iloc[:, 1:]
+data_indv = pd.read_csv(dataDir + genotypes + ".indv", sep="\t", index_col=False, header=None)
+data_sites = pd.read_csv(dataDir + genotypes + ".pos", sep="\t", index_col=False, header=None)
 
-data_genotypes_T.to_csv("AHQsd_T_is_ref.csv")
+# format the names of the sites
+tmpDF = pd.DataFrame(columns=['scaffold','chr'])
+tmpDF[['scaffold','chr']] = data_sites[0].str.split('_', expand=True)
 
+data_sites['chr'] = tmpDF['chr']
+data_sites['site'] = data_sites[0].astype(str) + ['_'] + data_sites[1].astype(str)
 
+# paste NT data and AHQsd data together
+AHQsd_and_NT = pd.concat([NT_data, data_genotypes])
 
-data_genotypes_N = pd.read_csv("AHQsd_N_is_ref.012", sep="\t", index_col=False, header=None).iloc[:, 1:]
-data_sites_N = pd.read_csv("AHQsd_N_is_ref.012.pos", sep="\t", index_col=False, header=None)
+all_indv = pd.concat([NT_indv, data_indv])
 
-tmpDF_N = pd.DataFrame(columns=['scaffold','chr'])
-tmpDF_N[['scaffold','chr']] = data_sites_N[0].str.split('_', expand=True)
+# add columns and row names 
+AHQsd_and_NT.columns = data_sites['site']
+AHQsd_and_NT.insert(0, 'indv', all_indv[0])
 
-data_sites_N['chr'] = tmpDF_N['chr']
-data_sites_N['site'] = data_sites_N[0].astype(str) + ['_'] + data_sites_N[1].astype(str)
+# transpose for filtering fun
+genotypes_transposed = AHQsd_and_NT.set_index('indv').T
 
-data_genotypes_N.columns = data_sites_N['site']
-data_genotypes_N.insert(0, 'indv', data_indv[0])
+# replace -1 with NaN
+genotypes_transposed = genotypes_transposed.replace(-1, np.NaN)
 
+genotypes_transposed.reset_index(inplace=True)
 
+# get rid of any sites where T and N are hets
+genotypes_transposed = genotypes_transposed[genotypes_transposed['AHQNT1.6_8'] != 1]
+genotypes_transposed = genotypes_transposed[genotypes_transposed['AHQT1'] != 1]
 
-# data_genotypes_N.to_csv("AHQsd_N_is_ref.csv")
+# make a T and an N dataframte
+T_is_ref = genotypes_transposed[genotypes_transposed['AHQNT1.6_8'] == 0]
+N_is_ref = genotypes_transposed[genotypes_transposed['AHQT1'] == 0]
 
-data_genotypes_T_transpose = data_genotypes_T.T
+## replace the genotypes for N
+N_is_ref = N_is_ref.replace(0.0, "N")
+N_is_ref = N_is_ref.replace(1.0, "NT")
+N_is_ref = N_is_ref.replace(2.0, "T")
 
-data_genotypes_N_transpose = data_genotypes_N.T
+## replace the genotypes for T
+T_is_ref = T_is_ref.replace(0.0, "T")
+T_is_ref = T_is_ref.replace(1.0, "NT")
+T_is_ref = T_is_ref.replace(2.0, "N")
 
-concat
+phased_sites = pd.concat([N_is_ref, T_is_ref])
+
+phased_sites.to_csv("AHQsd_phased.csv")

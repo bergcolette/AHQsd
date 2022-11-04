@@ -1,0 +1,1 @@
+vcftools --vcf ~/YNP/AHQsd_2021/stacks/NT.vcf --out NT_subset --positions ~/YNP/AHQsd_2021/stacks/AHQsd_forPhasing.012.pos --012
