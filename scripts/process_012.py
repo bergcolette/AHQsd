@@ -3,8 +3,8 @@ import numpy as np
 from pandas.api.types import is_string_dtype
 from pandas.api.types import is_numeric_dtype
 
-dataDir="/home/colette_berg/YNP/AHQsd_2021_stacks/"
-genotypes="AHQsd_forPhasing_thinned.012"
+dataDir="/home/colette_berg/YNP/AHQsd_2021/stacks/"
+genotypes="AHQsd_forPhasing_filtered.012"
 
 # read in the data -- genotypes, sites, and individuals. 
 

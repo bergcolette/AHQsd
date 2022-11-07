@@ -3,34 +3,29 @@
 mainDir="/home/colette_berg/YNP/AHQsd_2021/"
 stacksDir="/home/colette_berg/YNP/AHQsd_2021/stacks"
 
-populations -P ${stacksDir} \
--W ${stacksDir}NT_SNPs.012.pos \
--M ${mainDir}/bams/bamList.txt \
---vcf
+# populations -P ${stacksDir} \
+# -M ${mainDir}/bams/bamList.txt \
+# --vcf
 
-# filter the resulting vcf
+# filter the resulting vcf to only segregating sites
 
-vcftools --vcf populations.snps.vcf \
---maf .1 \
---min-alleles 2 \
---max-alleles 2 \ 
---minDP 3 \
---minQ 40 \
---out AHQsd_forPhasing \
---recode 
+# vcftools --vcf ${stacksDir}/populations.snps.vcf --positions ${stacksDir}/NT_SNPs.012.pos --out ${stacksDir}/AHQsd_forPhasing --recode 
 
 # look at the results and filter again, only keep one snp per tag
 
-vcftools --vcf AHQsd_forPhasing.recode.vcf \
---thin 150 \ 
---out AHQsd_forPhasing_thinned \
---012
+vcftools --vcf ${stacksDir}/AHQsd_forPhasing.recode.vcf \
+--min-alleles 2 \
+--max-alleles 2 \
+--max-missing .4 \
+--maf .3 \
+--max-maf .7 \
+--out ${stacksDir}/AHQsd_forPhasing_filtered --012 
 
 # then remake N & T patent vcfs just with these SNPs and output as 012
 
-vcftools --vcf NT.vcf \
---positions AHQsd_forPhasing_thinned.012.pos \
---out NT_forPhasing \
+vcftools --vcf ${stacksDir}/NT.vcf \
+--positions ${stacksDir}/AHQsd_forPhasing_filtered.012.pos \
+--out ${stacksDir}/NT_forPhasing \
 --012
 
 # take these outputs and run the python script
