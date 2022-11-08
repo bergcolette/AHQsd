@@ -45,8 +45,8 @@ genotypes_transposed = genotypes_transposed[genotypes_transposed['AHQNT1.6_8'] !
 genotypes_transposed = genotypes_transposed[genotypes_transposed['AHQT1'] != 1]
 
 # make a T and an N dataframte
-T_is_ref = genotypes_transposed[genotypes_transposed['AHQNT1.6_8'] == 0]
-N_is_ref = genotypes_transposed[genotypes_transposed['AHQT1'] == 0]
+N_is_ref = genotypes_transposed[genotypes_transposed['AHQNT1.6_8'] == 0]
+T_is_ref = genotypes_transposed[genotypes_transposed['AHQT1'] == 0]
 
 ## replace the genotypes for N
 N_is_ref = N_is_ref.replace(0.0, "N")
