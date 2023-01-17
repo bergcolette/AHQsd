@@ -3,15 +3,15 @@
 
 mainDir="/home/colette_berg/YNP/AHQsd_2021/plates"
 
-for name in AHQsd_1.1 #AHQsd_1.2 AHQsd_3.1 AHQsd_3.2 AHQsd_5.1 AHQsd_5.2 AHQsd_6.1 AHQsd_6.2
+for name in AHQsd_1.1 AHQsd_1.2 AHQsd_3.1 AHQsd_3.2 AHQsd_5.1 AHQsd_5.2 AHQsd_6.1 AHQsd_6.2
          
 do        
-gunzip ${mainDir}/${name}/${name}.1.fastq.gz
-gunzip ${mainDir}/${name}/${name}.2.fastq.gz
+gunzip ${mainDir}/${name}/${name}.rmdup.1.fastq.gz
+gunzip ${mainDir}/${name}/${name}.rmdup.2.fastq.gz
 # CTAG GATC
 python2.7 /home/thom_nelson/scripts/Flip2BeRAD/Flip2BeRAD/Flip2BeRAD.py \
-     -f ${mainDir}/${name}/${name}.1.fastq \
-     -r ${mainDir}/${name}/${name}.2.fastq \
+     -f ${mainDir}/${name}/${name}.rmdup.1.fastq \
+     -r ${mainDir}/${name}/${name}.rmdup.2.fastq \
      -b ${mainDir}/barcodes_BestRAD48.txt \
      -c TGCAG \
      -m 1 \
